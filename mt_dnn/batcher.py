@@ -39,16 +39,31 @@ class BatchGen:
                 indices = list(range(len(self.data)))
                 random.shuffle(indices)
                 data = [self.data[i] for i in indices]
-            self.data = BatchGen.make_baches(data, batch_size)
-        self.offset = 0
+            self.data = BatchGen.make_baches(data, batch_size) #提前把batch 准备 好，好奇这个怎么写到tfrecord文件的[[batch 1 list],[batch 2 list],[batch 3 list]]
+        self.offset = 0 #batch iter number
         self.dropout_w = dropout_w
 
     @staticmethod
     def make_baches(data, batch_size=32):
+        '''
+        this is for make batch
+        :param data:
+        :param batch_size:
+        :return:
+        '''
         return [data[i:i + batch_size] for i in range(0, len(data), batch_size)]
 
     @staticmethod
     def load(path, is_train=True, maxlen=128, factor=1.0, pairwise=False):
+        '''
+        load data from path,and try to do some data len checked
+        :param path:
+        :param is_train:
+        :param maxlen:
+        :param factor:
+        :param pairwise:
+        :return:
+        '''
         with open(path, 'r', encoding='utf-8') as reader:
             data = []
             cnt = 0
@@ -66,6 +81,10 @@ class BatchGen:
             return data
 
     def reset(self):
+        '''
+        reshuffle data
+        :return:
+        '''
         if self.is_train:
             indices = list(range(len(self.data)))
             random.shuffle(indices)
@@ -90,6 +109,11 @@ class BatchGen:
         return v
 
     def rebacth(self, batch):
+        '''
+
+        :param batch:
+        :return:
+        '''
         newbatch = []
         for sample in batch:
             size = len(sample['token_id'])
@@ -105,6 +129,11 @@ class BatchGen:
 
 
     def __iter__(self):
+        '''
+        iter used in
+        self.offset is a batch number
+        :return:
+        '''
         while self.offset < len(self):
             batch = self.data[self.offset]
             if self.pairwise:
